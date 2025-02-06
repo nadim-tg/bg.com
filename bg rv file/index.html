@@ -1,0 +1,70 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Remove Image Background</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .upload-box { border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 20px 0; }
+        #preview { max-width: 100%; margin: 20px 0; }
+        .download-btn { 
+            display: none; 
+            background: #4CAF50; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Remove Image Background</h1>
+    
+    <div class="upload-box">
+        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg">
+        <p>Drag and drop files here or click to upload</p>
+    </div>
+
+    <div id="result">
+        <img id="preview">
+        <a id="downloadLink" class="download-btn">Download Result</a>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const downloadLink = document.getElementById('downloadLink');
+
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                preview.src = `/download/${data.output.split('/').pop()}`;
+                downloadLink.href = `/download/${data.output.split('/').pop()}`;
+                downloadLink.style.display = 'inline-block';
+                downloadLink.download = `background_removed_${file.name}`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during processing');
+            }
+        });
+    </script>
+</body>
+</html>
